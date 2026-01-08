@@ -1,0 +1,5 @@
+1️⃣ Admin register / login
+2️⃣ Class add (Course + Semester)
+3️⃣ Subject add (Class ke under)
+4️⃣ Student add (User + Student)
+5️⃣ Result add (Student + Subject)
