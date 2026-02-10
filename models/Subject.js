@@ -6,24 +6,21 @@ const subjectSchema = new mongoose.Schema({
     ref: "Class",
     required: true
   },
-
   name: {
     type: String,
     required: true
   },
-
   code: {
     type: String,
     required: true
   },
-
   maxMarks: {
     type: Number,
     default: 100
   }
 }, { timestamps: true });
 
-// ❗ Same subject name/code cannot repeat in same class
+// ❗ Same class + same subject code unique
 subjectSchema.index(
   { class: 1, code: 1 },
   { unique: true }

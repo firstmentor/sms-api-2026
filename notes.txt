@@ -3,3 +3,27 @@
 3️⃣ Subject add (Class ke under)
 4️⃣ Student add (User + Student)
 5️⃣ Result add (Student + Subject)
+
+
+🧠 FINAL FLOW (Industry Standard)
+👨‍💼 ADMIN
+
+Register (1 time)
+
+Login
+
+Add Class (Course + Semester)
+
+Add Subject (Class wise)
+
+Add Student
+
+Add Result (Bulk subject marks)
+
+👨‍🎓 STUDENT
+
+Login
+
+View own result (Semester wise)
+
+Logout

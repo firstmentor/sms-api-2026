@@ -12,6 +12,8 @@ route.post('/register',AuthController.register)
 route.post("/login", AuthController.login);
 route.post("/logout", AuthController.logout);
 route.post("/change-password",authMiddleware,AuthController.changePassword);
+route.get("/profile",authMiddleware,AuthController.profile);
+
 
 
 
@@ -34,7 +36,7 @@ route.delete("/deleteClass/:id",authMiddleware,ClassController.deleteClass);
 //admin only Subject add
 route.post("/add-subject",authMiddleware,SubjectController.addSubject);
 route.get("/subjects",authMiddleware,SubjectController.getAllSubjects);
-// GET SUBJECTS BY CLASS
+// // GET SUBJECTS BY CLASS
 route.get("/subjects/class/:classId/",authMiddleware,SubjectController.getSubjectsByClass);
 route.get("/subjects/:id",authMiddleware,SubjectController.getSubjectById);
 route.put("/updateSubject/:id",authMiddleware,SubjectController.updateSubject);

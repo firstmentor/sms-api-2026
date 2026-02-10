@@ -16,5 +16,7 @@ const classSchema = new mongoose.Schema({
 
 // One course + semester only once
 classSchema.index({ course: 1, semester: 1 }, { unique: true });
+// “Har course aur semester ka combination sirf ek hi baar database me ho sakta hai.
+// Matlab duplicate entries allowed nahi hai.”
 
 module.exports = mongoose.model("Class", classSchema);

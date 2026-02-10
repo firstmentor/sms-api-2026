@@ -12,6 +12,7 @@ class StudentController {
   // ================= ADD STUDENT =================
   static addStudent = async (req, res) => {
     try {
+      
       const { error } = addStudentValidation.validate(req.body);
       if (error)
         return res.status(400).json({ message: error.details[0].message });
@@ -38,7 +39,7 @@ class StudentController {
         name,
         email: studentEmail,
         password: hashedPassword,
-        role: "student"
+        // role: "student"
       });
 
       // create student
@@ -55,6 +56,7 @@ class StudentController {
       });
 
     } catch (err) {
+      console.log(err)
       res.status(500).json({ message: "Server error" });
     }
   };

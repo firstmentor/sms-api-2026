@@ -127,6 +127,33 @@ class AuthController {
       res.status(500).json({ message: "Server error" });
     }
   };
+
+  // ✅ PROFILE API (AUTO LOGIN)
+  static profile = async (req, res) => {
+    try {
+      // authMiddleware se user aa raha hai
+      const userId = req.user.id;
+
+      const user = await User.findById(userId).select("-password");
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
 }
 
 module.exports = AuthController;

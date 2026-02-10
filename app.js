@@ -1,28 +1,35 @@
-const express = require('express')
-// console.log(express)
-const app = express()
-const PORT =3000
-const web = require('./routes/web')
-const dotenv =require('dotenv')
-const connectDb = require('./db/connectDb')
+const express = require("express");
+const app = express();
+const dotenv = require("dotenv");
+const web = require("./routes/web");
+const connectDb = require("./db/connectDb");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
+dotenv.config();
 
-//data get json
-app.use(express.json())
-dotenv.config()
-app.use(cookieParser()); // ⭐ MOST IMPORTANT
+// ✅ JSON middleware
+app.use(express.json());
 
+// ✅ Cookie parser (IMPORTANT)
+app.use(cookieParser());
 
-connectDb()
+// ✅ CORS FIX (COOKIE JWT KE LIYE)
+app.use(
+  cors({
+    origin: "http://localhost:5173", // 👈 React URL
+    credentials: true               // 👈 allow cookies
+  })
+);
 
+// ✅ DB Connect
+connectDb();
 
+// ✅ Routes
+app.use("/api", web);
 
-
-//localhost:3000/api
-app.use('/api',web)
-
-//server create
-app.listen(process.env.PORT,()=>{
-    console.log("server start localhost:4000")
-})
+// ✅ Server start
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});

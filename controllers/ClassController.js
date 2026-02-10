@@ -1,7 +1,7 @@
 const Class = require("../models/Class");
 const {
   addClassValidation,
-  updateClassValidation
+  updateClassValidation,
 } = require("../validations/classValidation");
 
 class ClassController {
@@ -16,19 +16,31 @@ class ClassController {
 
       const { course, semester } = req.body;
 
+      // Optional UX check
       const existClass = await Class.findOne({ course, semester });
       if (existClass) {
-        return res.status(400).json({ message: "Class already exists" });
+        return res.status(409).json({
+          message: "Class already exists",
+        });
       }
 
       const newClass = await Class.create({ course, semester });
 
       res.status(201).json({
         message: "Class added successfully",
-        class: newClass
+        class: newClass,
       });
 
     } catch (error) {
+      console.log(error);
+
+      // 🔴 DUPLICATE KEY
+      if (error.code === 11000) {
+        return res.status(409).json({
+          message: `Class already exists for ${error.keyValue.course} - Semester ${error.keyValue.semester}`,
+        });
+      }
+
       res.status(500).json({ message: "Server error" });
     }
   };
@@ -56,7 +68,7 @@ class ClassController {
     }
   };
 
-  // ✅ UPDATE CLASS
+  // ✅ UPDATE CLASS (🔥 FULLY FIXED)
   static updateClass = async (req, res) => {
     try {
       const { error } = updateClassValidation.validate(req.body);
@@ -78,10 +90,19 @@ class ClassController {
 
       res.status(200).json({
         message: "Class updated successfully",
-        class: classData
+        class: classData,
       });
 
     } catch (error) {
+      console.log(error);
+
+      // 🔴 DUPLICATE KEY
+      if (error.code === 11000) {
+        return res.status(409).json({
+          message: `Class already exists for ${error.keyValue.course} - Semester ${error.keyValue.semester}`,
+        });
+      }
+
       res.status(500).json({ message: "Server error" });
     }
   };

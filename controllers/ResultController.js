@@ -1,91 +1,113 @@
 const Result = require("../models/Result");
 const Student = require("../models/Student");
 const Subject = require("../models/Subject");
-const { addResultValidation, updateResultValidation } = require("../validations/resultValidation");
+const Joi = require("joi");
 
+/* ================= VALIDATION ================= */
+const addBulkResultValidation = Joi.object({
+  studentId: Joi.string().required(),
+  semester: Joi.number().min(1).max(8).required(),
+  year: Joi.number().min(2020).max(2030).required(),
+  marks: Joi.array()
+    .items(
+      Joi.object({
+        subjectId: Joi.string().required(),
+        marksObtained: Joi.number().min(0).required()
+      })
+    )
+    .min(1)
+    .required()
+});
+
+/* ================= CONTROLLER ================= */
 class ResultController {
 
-  // ================= ADD RESULT =================
-  static addResult = async (req, res) => {
+  // ✅ ADMIN → ADD RESULT (MULTIPLE SUBJECTS)
+  static addBulkResult = async (req, res) => {
     try {
-      const { error } = addResultValidation.validate(req.body);
-      if (error) return res.status(400).json({ message: error.details[0].message });
+      /* 1️⃣ Validate request */
+      const { error } = addBulkResultValidation.validate(req.body);
+      if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+      }
 
-      const { studentId, subjectId, marksObtained, semester, year } = req.body;
+      const { studentId, semester, year, marks } = req.body;
 
+      /* 2️⃣ Check student exists */
       const student = await Student.findById(studentId);
-      if (!student) return res.status(404).json({ message: "Student not found" });
+      if (!student) {
+        return res.status(404).json({ message: "Student not found" });
+      }
 
-      const subject = await Subject.findById(subjectId);
-      if (!subject) return res.status(404).json({ message: "Subject not found" });
+      let savedResults = [];
+      let skippedSubjects = [];
 
-      // check duplicate
-      const existResult = await Result.findOne({ student: studentId, subject: subjectId });
-      if (existResult) return res.status(400).json({ message: "Result already exists for this subject" });
+      /* 3️⃣ Loop subjects */
+      for (let item of marks) {
 
-      const result = await Result.create({
-        student: studentId,
-        subject: subjectId,
-        marksObtained,
-        semester,
-        year
+        const subject = await Subject.findById(item.subjectId);
+        if (!subject) {
+          skippedSubjects.push({
+            subjectId: item.subjectId,
+            reason: "Subject not found"
+          });
+          continue;
+        }
+
+        /* 4️⃣ Prevent duplicate result */
+        const alreadyExists = await Result.findOne({
+          student: studentId,
+          subject: item.subjectId,
+          semester,
+          year
+        });
+
+        if (alreadyExists) {
+          skippedSubjects.push({
+            subject: subject.name,
+            reason: "Result already exists"
+          });
+          continue;
+        }
+
+        /* 5️⃣ Calculate percentage & grade */
+        const percentage = (item.marksObtained / subject.maxMarks) * 100;
+
+        let grade = "F";
+        if (percentage >= 90) grade = "A+";
+        else if (percentage >= 80) grade = "A";
+        else if (percentage >= 70) grade = "B";
+        else if (percentage >= 60) grade = "C";
+        else if (percentage >= 50) grade = "D";
+
+        /* 6️⃣ Save result */
+        const result = await Result.create({
+          student: studentId,
+          subject: item.subjectId,
+          semester,
+          year,
+          marksObtained: item.marksObtained,
+          totalMarks: subject.maxMarks,
+          percentage,
+          grade
+        });
+
+        savedResults.push(result);
+      }
+
+      /* 7️⃣ Response */
+      res.status(201).json({
+        message: "Result declared successfully",
+        totalSubjects: marks.length,
+        savedCount: savedResults.length,
+        skipped: skippedSubjects,
+        results: savedResults
       });
 
-      res.status(201).json({ message: "Result added successfully", result });
-
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Server error" });
     }
-  };
-
-  // ================= GET ALL RESULTS =================
-  static getAllResults = async (req, res) => {
-    const results = await Result.find()
-      .populate("student", "rollNo class user")
-      .populate("subject", "name code maxMarks");
-    res.status(200).json(results);
-  };
-
-  // ================= GET RESULTS BY STUDENT =================
-  static getResultsByStudent = async (req, res) => {
-    const results = await Result.find({ student: req.params.studentId })
-      .populate("subject", "name code maxMarks")
-      .populate("student", "rollNo class user");
-    res.status(200).json(results);
-  };
-
-  // ================= UPDATE RESULT =================
-  static updateResult = async (req, res) => {
-    try {
-      const { error } = updateResultValidation.validate(req.body);
-      if (error) return res.status(400).json({ message: error.details[0].message });
-
-      const result = await Result.findById(req.params.id);
-      if (!result) return res.status(404).json({ message: "Result not found" });
-
-      const { marksObtained, semester, year } = req.body;
-
-      if (marksObtained !== undefined) result.marksObtained = marksObtained;
-      if (semester) result.semester = semester;
-      if (year) result.year = year;
-
-      await result.save();
-
-      res.status(200).json({ message: "Result updated successfully", result });
-
-    } catch (err) {
-      res.status(500).json({ message: "Server error" });
-    }
-  };
-
-  // ================= DELETE RESULT =================
-  static deleteResult = async (req, res) => {
-    const result = await Result.findById(req.params.id);
-    if (!result) return res.status(404).json({ message: "Result not found" });
-
-    await Result.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Result deleted successfully" });
   };
 }
 
