@@ -12,7 +12,7 @@ class StudentController {
   // ================= ADD STUDENT =================
   static addStudent = async (req, res) => {
     try {
-      
+      console.log(req.body)
       const { error } = addStudentValidation.validate(req.body);
       if (error)
         return res.status(400).json({ message: error.details[0].message });
@@ -85,6 +85,7 @@ class StudentController {
   // ================= UPDATE STUDENT =================
   static updateStudent = async (req, res) => {
     try {
+      console.log(req.body)
       const { error } = updateStudentValidation.validate(req.body);
       if (error)
         return res.status(400).json({ message: error.details[0].message });
@@ -95,29 +96,43 @@ class StudentController {
 
       const user = await User.findById(student.user);
 
-      const { name, email, password, classId, year } = req.body;
+      const { name, rollNo, classId, year, password, email } = req.body;
 
+      // name update
       if (name) user.name = name;
 
+      // rollNo update
+      if (rollNo && rollNo !== student.rollNo) {
+        if (await Student.findOne({ rollNo }))
+          return res.status(400).json({ message: "Roll number already exists" });
+
+        student.rollNo = rollNo;
+
+        // auto email update if manual email not provided
+        user.email = email || `${rollNo}@college.com`;
+      }
+
+      // manual email update
       if (email && email !== user.email) {
         if (await User.findOne({ email }))
           return res.status(400).json({ message: "Email already exists" });
+
         user.email = email;
       }
 
       if (password)
         user.password = await bcrypt.hash(password, 10);
 
-      await user.save();
-
       if (classId) student.class = classId;
       if (year) student.year = year;
 
+      await user.save();
       await student.save();
 
       res.status(200).json({ message: "Student updated successfully" });
 
     } catch (err) {
+      console.log(err);
       res.status(500).json({ message: "Server error" });
     }
   };

@@ -6,6 +6,7 @@ const connectDb = require("./db/connectDb");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+
 dotenv.config();
 
 // ✅ JSON middleware

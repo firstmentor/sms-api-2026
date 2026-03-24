@@ -4,6 +4,7 @@ const authMiddleware = require('../Middleware/authMiddleware')
 const StudentController = require('../controllers/StudentController')
 const ClassController = require('../controllers/ClassController')
 const SubjectController = require('../controllers/SubjectController')
+const ResultController = require('../controllers/ResultController')
 
 const route =express.Router()
 
@@ -41,6 +42,14 @@ route.get("/subjects/class/:classId/",authMiddleware,SubjectController.getSubjec
 route.get("/subjects/:id",authMiddleware,SubjectController.getSubjectById);
 route.put("/updateSubject/:id",authMiddleware,SubjectController.updateSubject);
 route.delete("/deleteSubject/:id",authMiddleware,SubjectController.deleteSubject);
+
+
+//result add
+route.post("/admin/result/bulk",authMiddleware,ResultController.addBulkResult);
+route.get("/admin/all/result",authMiddleware,ResultController.allResult);
+route.get("/my-result", authMiddleware, ResultController.getMyResult);
+
+
 
 
 

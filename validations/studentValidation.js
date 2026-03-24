@@ -6,7 +6,7 @@ exports.addStudentValidation = Joi.object({
   classId: Joi.string().required(),
   year: Joi.number().min(2020).max(2030).required(),
   password: Joi.string().min(6).required(),
-  email: Joi.string().email().optional()
+  email: Joi.string().email().required()
 });
 
 exports.updateStudentValidation = Joi.object({
@@ -14,5 +14,7 @@ exports.updateStudentValidation = Joi.object({
   email: Joi.string().email().optional(),
   password: Joi.string().min(6).optional(),
   classId: Joi.string().optional(),
-  year: Joi.number().optional()
+  year: Joi.number().optional(),
+ rollNo: Joi.string().optional(),   // ✅ ADD THIS
+
 });
