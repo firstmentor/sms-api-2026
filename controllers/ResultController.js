@@ -141,9 +141,8 @@ class ResultController {
 
   // GET Logged In Student Result
   // GET MY RESULT
- static getMyResult = async (req, res) => {
+static getMyResult = async (req, res) => {
   try {
-
     const userId = req.user.id;
 
     const student = await Student.findOne({ user: userId })
@@ -157,13 +156,13 @@ class ResultController {
     const results = await Result.find({ student: student._id })
       .populate("subject", "name code");
 
-    // total calculation
+    // total
     const total = results.reduce((sum, r) => sum + r.marksObtained, 0);
     const max = results.reduce((sum, r) => sum + r.totalMarks, 0);
 
     const percentage = max ? (total / max) * 100 : 0;
 
-    // grade auto
+    // Grade auto
     let grade = "F";
     if (percentage >= 90) grade = "A+";
     else if (percentage >= 75) grade = "A";
@@ -171,16 +170,37 @@ class ResultController {
     else if (percentage >= 50) grade = "C";
     else if (percentage >= 33) grade = "D";
 
+    // Class Topper Logic
+    const classStudents = await Student.find({ class: student.class._id });
+
+    let topper = null;
+    let highest = 0;
+
+    for (let s of classStudents) {
+      const r = await Result.find({ student: s._id });
+
+      const t = r.reduce((sum, x) => sum + x.marksObtained, 0);
+      const m = r.reduce((sum, x) => sum + x.totalMarks, 0);
+
+      const p = m ? (t / m) * 100 : 0;
+
+      if (p > highest) {
+        highest = p;
+        topper = s;
+      }
+    }
+
     res.status(200).json({
       student,
       results,
       percentage: percentage.toFixed(2),
-      grade
+      grade,
+      topper
     });
 
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error",error});
+    res.status(500).json({ message: "Server error" });
   }
 };
 }
