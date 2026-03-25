@@ -150,9 +150,9 @@ class ResultController {
     // find student by user id
     const student = await Student.findOne({ user: userId })
       .populate("user", "name email")
-      .populate("class", "name");   // 🔥 class name yaha se aa jayega
+      .populate("Class", "course");   // 🔥 class name yaha se aa jayega
 
-     console.log(student) 
+     
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
