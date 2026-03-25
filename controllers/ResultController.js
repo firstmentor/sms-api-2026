@@ -150,7 +150,7 @@ class ResultController {
     // find student by user id
     const student = await Student.findOne({ user: userId })
       .populate("user", "name email")
-      .populate("Class", "course");   // 🔥 class name yaha se aa jayega
+      .populate("class", "course");   // 🔥 class name yaha se aa jayega
 
      
 
