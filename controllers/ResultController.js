@@ -152,6 +152,8 @@ class ResultController {
       .populate("user", "name email")
       .populate("class", "name");   // 🔥 class name yaha se aa jayega
 
+     console.log(student) 
+
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
