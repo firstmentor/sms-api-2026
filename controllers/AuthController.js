@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 class AuthController {
-
   // REGISTER (ADMIN / STUDENT)
   static register = async (req, res) => {
     try {
@@ -20,7 +19,7 @@ class AuthController {
         name,
         email,
         password: hashedPassword,
-        role
+        role,
       });
 
       res.status(201).json({
@@ -29,10 +28,9 @@ class AuthController {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
-        }
+          role: user.role,
+        },
       });
-
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Server error" });
@@ -42,7 +40,7 @@ class AuthController {
   // LOGIN (ADMIN + STUDENT)
   static login = async (req, res) => {
     try {
-      const { email, password } = req.body
+      const { email, password } = req.body;
       const user = await User.findOne({ email });
       // console.log(user)
       if (!user) {
@@ -58,16 +56,16 @@ class AuthController {
       const token = jwt.sign(
         { id: user._id, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+        { expiresIn: "1d" },
       );
       // console.log(token)
 
       // ✅ HTTP-ONLY COOKIE
       res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000
+        httpOnly: true, // recommended
+        secure: true, // true if using HTTPS in production
+        sameSite: "none", // important for cross-origin
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
       });
       res.status(200).json({
         message: "Login successful",
@@ -75,11 +73,9 @@ class AuthController {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
-        }
+          role: user.role,
+        },
       });
-
-
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Server error" });
@@ -91,7 +87,6 @@ class AuthController {
     res.clearCookie("token");
     res.status(200).json({ message: "Logout successful" });
   };
-
 
   static changePassword = async (req, res) => {
     try {
@@ -120,7 +115,7 @@ class AuthController {
       await user.save();
 
       res.status(200).json({
-        message: "Password changed successfully"
+        message: "Password changed successfully",
       });
     } catch (error) {
       console.log(error);
@@ -145,10 +140,9 @@ class AuthController {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
-        }
+          role: user.role,
+        },
       });
-
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Server error" });
