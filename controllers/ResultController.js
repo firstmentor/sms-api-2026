@@ -144,32 +144,43 @@ class ResultController {
  static getMyResult = async (req, res) => {
   try {
 
-    // logged in user id from JWT
     const userId = req.user.id;
 
-    // find student by user id
     const student = await Student.findOne({ user: userId })
       .populate("user", "name email")
-      .populate("class", "course");   // 🔥 class name yaha se aa jayega
-
-     
+      .populate("class", "course");
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // find results
     const results = await Result.find({ student: student._id })
       .populate("subject", "name code");
 
+    // total calculation
+    const total = results.reduce((sum, r) => sum + r.marksObtained, 0);
+    const max = results.reduce((sum, r) => sum + r.totalMarks, 0);
+
+    const percentage = max ? (total / max) * 100 : 0;
+
+    // grade auto
+    let grade = "F";
+    if (percentage >= 90) grade = "A+";
+    else if (percentage >= 75) grade = "A";
+    else if (percentage >= 60) grade = "B";
+    else if (percentage >= 50) grade = "C";
+    else if (percentage >= 33) grade = "D";
+
     res.status(200).json({
       student,
-      results
+      results,
+      percentage: percentage.toFixed(2),
+      grade
     });
 
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" ,error});
+    res.status(500).json({ message: "Server error",error});
   }
 };
 }
