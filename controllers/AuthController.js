@@ -84,8 +84,21 @@ class AuthController {
 
   // LOGOUT
   static logout = async (req, res) => {
-    res.clearCookie("token");
-    res.status(200).json({ message: "Logout successful" });
+    try {
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+      });
+
+      res.status(200).json({
+        message: "Logout successful",
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Logout failed",
+      });
+    }
   };
 
   static changePassword = async (req, res) => {
