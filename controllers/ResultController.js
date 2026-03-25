@@ -141,16 +141,16 @@ class ResultController {
 
   // GET Logged In Student Result
   // GET MY RESULT
-  static getMyResult = async (req, res) => {
-    try {
+ static getMyResult = async (req, res) => {
+  try {
 
-       // logged in user id from JWT
+    // logged in user id from JWT
     const userId = req.user.id;
 
     // find student by user id
     const student = await Student.findOne({ user: userId })
       .populate("user", "name email")
-      .populate("class", "name");
+      .populate("class", "name");   // 🔥 class name yaha se aa jayega
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
@@ -158,26 +158,18 @@ class ResultController {
 
     // find results
     const results = await Result.find({ student: student._id })
-      .populate("subject", "name code")
-      .populate({
-        path: "student",
-        populate: [
-          { path: "user", select: "name email" },
-          { path: "class", select: "name" }
-        ]
-      });
+      .populate("subject", "name code");
 
     res.status(200).json({
       student,
       results
     });
 
-
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Server error" });
-    }
-  };
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 }
 
 module.exports = ResultController;
