@@ -1,12 +1,24 @@
 const express = require('express')
+const route =express.Router()
 const AuthController = require('../controllers/AuthController')
 const authMiddleware = require('../Middleware/authMiddleware')
 const StudentController = require('../controllers/StudentController')
 const ClassController = require('../controllers/ClassController')
 const SubjectController = require('../controllers/SubjectController')
 const ResultController = require('../controllers/ResultController')
+const {
+  addNotice,
+  getNotices,
+  deleteNotice,
+} = require("../controllers/noticeController");
 
-const route =express.Router()
+
+route.post("/notice", addNotice);
+route.get("/notice", getNotices);
+route.delete("/notice/:id", deleteNotice);
+
+
+
 
 
 route.post('/register',AuthController.register)
