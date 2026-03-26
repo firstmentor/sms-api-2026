@@ -18,7 +18,7 @@ app.use(cookieParser());
 // ✅ CORS FIX (COOKIE JWT KE LIYE)
 app.use(
   cors({
-    origin: "http://localhost:5173", // 👈 React URL
+    origin: "https://smspn.netlify.app", // 👈 React URL
     credentials: true               // 👈 allow cookies
   })
 );
